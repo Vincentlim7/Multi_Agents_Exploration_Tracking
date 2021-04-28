@@ -24,7 +24,7 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 	private static final long serialVersionUID = 9088209402507795289L;
 
 	private boolean finished=false;
-	private Agent myagent;
+	private ExploreCoopAgent myAgent;
 	
 	/**
 	 * 
@@ -32,10 +32,10 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 	 * It receives a message tagged with an inform performative, print the content in the console and destroy itlself
 	 * @param myagent
 	 */
-	public ReceiveMessageBehaviour(final Agent myagent) {
-		super(myagent);
-		this.myagent = myagent;
-
+	public ReceiveMessageBehaviour(final ExploreCoopAgent myAgent) {
+		super(myAgent);
+		this.myAgent = myAgent;
+		System.out.println("-----------------RECEIVE BEHAVIOUR CREATED-----------------");
 	}
 
 
@@ -44,35 +44,62 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 		final MessageTemplate pingMsgTemplate = MessageTemplate.and(MessageTemplate.MatchProtocol("PingNeighborsProtocol"), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
 		final MessageTemplate mapMsgTemplate = MessageTemplate.and(MessageTemplate.MatchProtocol("ShareMapProtocol"), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
 		final MessageTemplate confimMsgTemplate = MessageTemplate.and(MessageTemplate.MatchProtocol("ConfirmProtocol"), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+		final MessageTemplate checkGolemMsgTemplate1 = MessageTemplate.and(MessageTemplate.MatchProtocol("CheckGolemProtocol1"), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+		final MessageTemplate checkGolemMsgTemplate2 = MessageTemplate.and(MessageTemplate.MatchProtocol("CheckGolemProtocol2"), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
 		
 		final ACLMessage pingMsg = this.myAgent.receive(pingMsgTemplate);
 		final ACLMessage mapMsg = this.myAgent.receive(mapMsgTemplate);
 		final ACLMessage confirmMsg = this.myAgent.receive(confimMsgTemplate);
+		final ACLMessage checkGolemMsg1 = this.myAgent.receive(checkGolemMsgTemplate1);
+		final ACLMessage checkGolemMsg2 = this.myAgent.receive(checkGolemMsgTemplate2);
 		
-			
-		if (pingMsg !=null || mapMsg != null ||confirmMsg != null) {
+//		System.out.println("------- Receive behaviour");
+//		System.out.println("---------------------------list message" + pingMsg + mapMsg + confirmMsg + checkGolemMsg1 + checkGolemMsg2);
+		if (pingMsg !=null || mapMsg != null ||confirmMsg != null || checkGolemMsg1 != null || checkGolemMsg2 != null) {
+//			System.out.println("-------------------------Message recu");
 			try {
 				if (pingMsg != null) {
 					String idSender = pingMsg.getContent();
-					((ExploreCoopAgent)this.myAgent).addDetectedAgents(Integer.valueOf(idSender));
-					System.out.println("Ping recu");
-					
-				}
-				if(mapMsg != null) {
-					SerializableSimpleGraph o = (SerializableSimpleGraph) mapMsg.getContentObject();
-					((ExploreCoopAgent) this.myAgent).getMap().mergeMap(o);
-//					System.out.println(this.myAgent.getLocalName()+"<----Result received from "+msg.getSender().getLocalName()+" ,content= "+msg.getContentObject());
-					
+					this.myAgent.addDetectedAgent(idSender);
 					ACLMessage msg=new ACLMessage(ACLMessage.INFORM);
 					msg.setSender(this.myAgent.getAID());
 					msg.setProtocol("ConfirmProtocol");
-					msg.setContent("Carte recu");
-					msg.addReceiver(new AID(mapMsg.getSender().toString(),AID.ISLOCALNAME));
-					((AbstractDedaleAgent)this.myAgent).sendMessage(msg);
-					System.out.println("Carte recu");
+					msg.setContent("Ping recu");
+					msg.addReceiver(new AID(pingMsg.getSender().getLocalName(),AID.ISLOCALNAME));
+					this.myAgent.sendMessage(msg);
+//					System.out.println("Ping recu");
+					
+				}
+				if (mapMsg != null) {
+					System.out.println("MAP MESSAGE RECEIVED");
+					SerializableSimpleGraph o = (SerializableSimpleGraph) mapMsg.getContentObject();
+					this.myAgent.getMap().mergeMap(o);
+//					System.out.println(this.myAgent.getLocalName()+"<----Result received from "+msg.getSender().getLocalName()+" ,content= "+msg.getContentObject());
+//					System.out.println("Carte recu");
 				}
 				if(confirmMsg != null) {
-					System.out.println("Message de confirmation");
+//					System.out.println("YESYESYESYESYES");
+					this.myAgent.addBehaviour(new SendMessagerBehaviour(this.myAgent));
+				}
+				
+				// If ping received, send current position to the ping sender
+				if(checkGolemMsg1 != null) {
+					System.out.println("-------CheckGolemMSG Received");
+					String myPosition = this.myAgent.getCurrentPosition();
+					ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+					msg.setSender(this.myAgent.getAID());
+					msg.setProtocol("CheckGolemProtocol1");
+					msg.setContent(myPosition);
+					msg.addReceiver(new AID(checkGolemMsg1.getSender().getLocalName(),AID.ISLOCALNAME));
+					this.myAgent.sendMessage(msg);
+				}
+				
+				// Add the received position to a list
+				if(checkGolemMsg2 != null) {
+					String agentPos = checkGolemMsg2.getContent();
+					System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+					this.myAgent.addAgentPos(agentPos);
+					
 				}
 				
 			} catch (UnreadableException e1) {
@@ -89,6 +116,11 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 
 	public boolean done() {
 		return finished;
+	}
+	
+	public void finished() {
+		finished = true;
+		System.out.println("-----------------PING BEHAVIOUR FINISHED-----------------");
 	}
 
 }

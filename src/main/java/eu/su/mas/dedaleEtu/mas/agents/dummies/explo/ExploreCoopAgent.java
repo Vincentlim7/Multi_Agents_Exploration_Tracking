@@ -7,9 +7,9 @@ import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import eu.su.mas.dedale.mas.agent.behaviours.startMyBehaviours;
 
 import eu.su.mas.dedaleEtu.mas.behaviours.ExploCoopBehaviour;
-import eu.su.mas.dedaleEtu.mas.behaviours.ExploSoloBehaviour;
 import eu.su.mas.dedaleEtu.mas.behaviours.ReceiveMessageBehaviour;
 import eu.su.mas.dedaleEtu.mas.behaviours.SendMessagerBehaviour;
+import eu.su.mas.dedaleEtu.mas.behaviours.TrackGolemBehaviour;
 import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation;
 
 import jade.core.behaviours.Behaviour;
@@ -44,11 +44,11 @@ public class ExploreCoopAgent extends AbstractDedaleAgent {
 
 	private static final long serialVersionUID = -7969469610241668140L;
 	private MapRepresentation myMap;
-	private DFAgentDescription dfd;
-	private ExploCoopBehaviour exploB;
 	public static int cpt = 1;
-	private int idAgent;
-	private ArrayList<Integer> listDetectedAgents = new ArrayList<Integer>();
+	private String idAgent;
+	private ArrayList<String> listDetectedAgents;
+	private ArrayList<String> listAgentsPos;
+	DFAgentDescription dfd;
 	
 
 	/**
@@ -60,37 +60,18 @@ public class ExploreCoopAgent extends AbstractDedaleAgent {
 	 */
 	protected void setup(){
 		super.setup();
-		this.idAgent = cpt;
-		cpt++;
-		listDetectedAgents.add(this.idAgent);
-
-		final Object[] args = getArguments();
 		
-
-		List<Behaviour> lb=new ArrayList<Behaviour>();
-
+		this.idAgent = String.valueOf(cpt);
+		cpt++;
+		
+		resetDetectedAgents();
+		
 		this.dfd = new DFAgentDescription();
 		signYP(dfd);
 		
-		/************************************************
-		 * 
-		 * ADD the behaviours of the Dummy Moving Agent
-		 * 
-		 ************************************************/
-
-
-		this.exploB = new ExploCoopBehaviour(this,this.myMap);
-		lb.add(exploB);
-		lb.add(new ReceiveMessageBehaviour(this));
-		lb.add(new SendMessagerBehaviour(this, dfd, this.exploB));
-		
-
-		
-		
-		/***
-		 * MANDATORY TO ALLOW YOUR AGENT TO BE DEPLOYED CORRECTLY
-		 */
-		
+		List<Behaviour> lb=new ArrayList<Behaviour>();
+		lb.add(new ExploCoopBehaviour(this));
+//		lb.add(new TrackGolemBehaviour(this));
 		
 		addBehaviour(new startMyBehaviours(this,lb));
 		
@@ -111,25 +92,51 @@ public class ExploreCoopAgent extends AbstractDedaleAgent {
 			fe.printStackTrace();
 		}
 	}
+
+	
+	public DFAgentDescription getAgentDescription() {
+		return this.dfd;
+	}
+	
+	
+	public void createMap() {
+		this.myMap= new MapRepresentation();
+	}
 	
 	public MapRepresentation getMap() {
-		return myMap;
+		return this.myMap;
 	}
 	
-	public ExploCoopBehaviour getExploB() {
-		return this.exploB;
-	}
 	
-	public int getIdAgent() {
+	public String getIdAgent() {
 		return this.idAgent;
 	}
 	
-	public void addDetectedAgents(int idAgent) {
-		listDetectedAgents.add(idAgent);
+	// id list of detected agents functions
+	public void resetDetectedAgents() {
+		this.listDetectedAgents = new ArrayList<String>();
+		addDetectedAgent(this.idAgent);
 	}
 	
-	public ArrayList<Integer> getDetectedAgents(){
-		return listDetectedAgents;
+	public void addDetectedAgent(String idAgent) {
+		this.listDetectedAgents.add(idAgent);
+	}
+	
+	public ArrayList<String> getDetectedAgents(){
+		return this.listDetectedAgents;
+	}
+	
+	// pos list of detected agents functions
+	public void resetAgentsPos() {
+		this.listAgentsPos = new ArrayList<String>();
+	}
+	
+	public void addAgentPos(String agentPos) {
+		this.listAgentsPos.add(idAgent);
+	}
+	
+	public ArrayList<String> getAgentsPos(){
+		return this.listAgentsPos;
 	}
 	
 }
