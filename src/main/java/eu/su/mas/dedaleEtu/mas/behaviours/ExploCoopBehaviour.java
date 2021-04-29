@@ -17,7 +17,6 @@ import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation.MapAttribute;
 import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation;
 import eu.su.mas.dedaleEtu.mas.agents.dummies.explo.ExploreCoopAgent;
-import eu.su.mas.dedaleEtu.mas.behaviours.ShareMapBehaviour;
 
 
 import jade.core.AID;
@@ -45,14 +44,12 @@ import jade.lang.acl.UnreadableException;
 public class ExploCoopBehaviour extends SimpleBehaviour {
 
 	private static final long serialVersionUID = 8567689731496787661L;
-	
 	private boolean finished = false;
-	
+	private boolean firstIte = true;
 	private ArrayList<String> listIdAgent;
-	private String myId;
-	ExploreCoopAgent myAgent;
-	PingNeighborsBehaviour pingBehaviour;
-	ReceiveMessageBehaviour receiveBehaviour;
+	private ExploreCoopAgent myAgent;
+	private PingNeighborsBehaviour pingBehaviour;
+	private ReceiveMessageBehaviour receiveBehaviour;
 
 
 /**
@@ -66,26 +63,24 @@ public class ExploCoopBehaviour extends SimpleBehaviour {
 
 	@Override
 	public void action() {
-
-//		System.out.println("------- " +this.myAgent.getLocalName() + " ITERATION SUIVANTE -------");
 		if(this.myAgent.getMap()==null) {
 			this.myAgent.createMap();
+
+		}
+		if(firstIte) {
 			this.pingBehaviour = new PingNeighborsBehaviour(this.myAgent);
 			this.receiveBehaviour = new ReceiveMessageBehaviour(this.myAgent);
 			this.myAgent.addBehaviour(pingBehaviour);
 			this.myAgent.addBehaviour(receiveBehaviour);
+			firstIte = false;
 		}
 		
-		this.myAgent.resetDetectedAgents();
-		// 0) Retrieve the current position
-		String myPosition=((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
+		this.myAgent.resetDetectedAgents();		// Reset detected agents list
+		String myPosition=((AbstractDedaleAgent)this.myAgent).getCurrentPosition(); // Retrieve current pos
 
 		if (myPosition!=null){
-			// List of observable from the agent's current position
-			List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe();//myPosition
-//			System.out.println("Observations de l'agent : " + lobs.toString());
-//			System.out.println("TYPE :" + lobs.get(0).getRight().getClass());
-
+			List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe(); // List of observable from the agent's current position
+			System.out.println(this.myAgent.getLocalName() + " --> Observations : " + lobs.toString());
 			try {
 				this.myAgent.doWait(500);
 			} catch (Exception e) {
@@ -105,37 +100,26 @@ public class ExploCoopBehaviour extends SimpleBehaviour {
 				if (myPosition!=nodeId) {
 					this.myAgent.getMap().addEdge(myPosition, nodeId);
 					if (nextNode==null && isNewNode) {
-						nextNode=nodeId;
-//						System.out.println("NEXT NODE : : " + nextNode.toString());
-//						System.out.println("TYPE DE NEXT NODE : : " + nextNode.toString().getClass());
+						nextNode=nodeId; // nextNode is adjacent to current pos
 					}
 				}
 			}
 
 			// 3) while openNodes is not empty, continues.
-			if (!this.myAgent.getMap().hasOpenNode()){
-				// Explo finished
-				System.out.println("-----------------PING BEHEVIOUR FINISHED-----------------");
-				this.pingBehaviour.stop();
-				this.receiveBehaviour.finished();
-				finished=true;
-				System.out.println(this.myAgent.getLocalName()+" - Exploration successufully done, behaviour removed.");
-				this.myAgent.addBehaviour(new TrackGolemBehaviour(this.myAgent));
-			}else{
+			if (this.myAgent.getMap().hasOpenNode()){
 				// 4) select next move.
-				// 4.1 If there exist one open node directly reachable, go for it,
-				//	 otherwise choose one from the openNode list, compute the shortestPath and go for it
-				// no directly accessible openNode
-				// chose one, compute the path and take the first step.
 				// To avoid agents following each other after sharing their map,
 				// they chose a different nextNode (smallest id choose first)
 				if (nextNode==null){
-					listIdAgent =this.myAgent.getDetectedAgents();
-					myId = this.myAgent.getIdAgent();
+					ArrayList<ArrayList<String>> listDetectedAgents = this.myAgent.getDetectedAgents();
+					this.listIdAgent = new ArrayList<String>();
+					for(int i = 0; i < listDetectedAgents.size(); i++) {
+						this.listIdAgent.add(listDetectedAgents.get(i).get(0)); // add id of each detected agents
+					}
 					Collections.sort(listIdAgent);
 					for(int i=0; i < listIdAgent.size(); i++) {
-						if (listIdAgent.get(i) == myId) {
-							nextNode=this.myAgent.getMap().getShortestPathToClosestOpenNode(myPosition).get(i);//getShortestPath(myPosition,this.openNodes.get(0)).get(0);
+						if (listIdAgent.get(i) == this.myAgent.getIdAgent()) {
+							nextNode=this.myAgent.getMap().getShortestPathToClosestOpenNode(myPosition).get(i);
 							break;
 						}
 					}
@@ -144,10 +128,15 @@ public class ExploCoopBehaviour extends SimpleBehaviour {
 				}else {
 					//System.out.println("nextNode notNUll - "+this.myAgent.getLocalName()+"-- list= "+this.myAgent.getMap().getOpenNodes()+"\n -- nextNode: "+nextNode);
 				}
-				System.out.println(this.myAgent.getLocalName() + " current pos : " + myPosition + " / next post : " + nextNode);
 				((AbstractDedaleAgent)this.myAgent).moveTo(nextNode);
+			}else { // Exploration finished
+				// Terminate sub behaviours
+				this.pingBehaviour.stop();
+				this.receiveBehaviour.finished();
+				finished=true;
+				System.out.println(this.myAgent.getLocalName() + " --> Exploration successufully done, behaviour removed.");
+//				this.myAgent.addBehaviour(new TrackGolemBehaviour(this.myAgent)); // Start next behaviour
 			}
-			
 		}
 	}
 

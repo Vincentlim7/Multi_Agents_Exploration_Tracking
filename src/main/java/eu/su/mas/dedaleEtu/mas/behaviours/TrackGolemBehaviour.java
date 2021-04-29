@@ -47,7 +47,7 @@ public class TrackGolemBehaviour extends SimpleBehaviour {
 	private static final long serialVersionUID = 8567689731496787661L;
 
 	private boolean finished = false;
-	
+	private boolean firstIte = true;
 	private ArrayList<Integer> listIdAgent;
 	private int myId;
 	private Random r;
@@ -56,6 +56,8 @@ public class TrackGolemBehaviour extends SimpleBehaviour {
 	private String newPos;
 	private Boolean golemFound;
 	private String nextNode2;
+	private PingNeighborsBehaviour pingBehaviour;
+	private ReceiveMessageBehaviour receiveBehaviour;
 /**
  * 
  * @param myagent
@@ -66,51 +68,51 @@ public class TrackGolemBehaviour extends SimpleBehaviour {
 		this.r = new Random();
 		this.oldPos = "";
 		this.golemFound = false;
-		this.myAgent.addBehaviour(new ReceiveMessageBehaviour(this.myAgent));
 		System.out.println("-----------------TRACK GOLEM BEHAVIOUR CREATED-----------------");
 	}
 
 	@Override
 	public void action() {
-
+		if(firstIte) {
+			this.pingBehaviour = new PingNeighborsBehaviour(this.myAgent);
+			this.receiveBehaviour = new ReceiveMessageBehaviour(this.myAgent);
+			this.myAgent.addBehaviour(pingBehaviour);
+			this.myAgent.addBehaviour(receiveBehaviour);
+			firstIte = false;
+		}
+		this.myAgent.resetDetectedAgents();		// Reset detected agents list
 		//0) Retrieve the current position
 		String myPosition=((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
-		this.myAgent.resetAgentsPos();
-		this.myAgent.addAgentPos(myPosition);
+		
+		// while(true)
+		System.out.println("-----------------DEBUT ITERATION-----------------");
+		if (myPosition!=null){
+			//List of observable from the agent's current position
+			List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe();//myPosition
+			System.out.println(this.myAgent.getLocalName() + " --> Observations : " + lobs.toString());
+			String nextNode = null;
 
-		while(true) {
-			System.out.println("-----------------DEBUT ITERATION-----------------");
-			if (myPosition!=null){
-				//List of observable from the agent's current position
-				List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe();//myPosition
-				System.out.println("Observations de l'agent : " + lobs.toString());
-				String nextNode = null;
-
-				/**
-				 * Just added here to let you see what the agent is doing, otherwise he will be too quick
-				 */
-				try {
-					this.myAgent.doWait(300);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				// If golem not found, compute a nextNode
-				// Else, golem was found because the agent was not able to move at the previous iteration
-				// Try moving to the same node
-				if(golemFound == false) {
-					// List of neighboring nodes with a stench
-					ArrayList<String> potentialNodes = new ArrayList<String>();
-					for (int i = 1; i<lobs.size(); i++) {
-						ArrayList<Couple> content = (ArrayList) lobs.get(i).getRight();
+			try {
+				this.myAgent.doWait(500);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			// If golem not found, compute a nextNode
+			// Else, golem was found because the agent was not able to move at the previous iteration
+			// Try moving to the same node
+			if(golemFound == false) {
+				ArrayList<String> stenchedNodes = new ArrayList<String>(); // List of neighboring nodes with a stench
+				for (int i = 1; i<lobs.size(); i++) {
+					ArrayList<Couple> content = (ArrayList) lobs.get(i).getRight();
 //						System.out.println("node" + lobs.get(i));
 //						System.out.println("Content :" + content);
-						if (content.isEmpty() == false) {
-							if (content.get(content.size() - 1).getLeft().toString().equals("Stench")) {
-								potentialNodes.add((String) lobs.get(i).getLeft());
+					if (content.isEmpty() == false) {
+						if (content.get(content.size() - 1).getLeft().toString().equals("Stench")) {
+							stenchedNodes.add((String) lobs.get(i).getLeft());
 //								System.out.println("POTENTIAL NODE FOUND");
-							}						
-						}					
-					}
+						}						
+					}					
+				}
 //					for(Couple node:lobs) {
 //						ArrayList<Couple> content = (ArrayList) node.getRight();
 ////						System.out.println("node" + node);
@@ -122,48 +124,48 @@ public class TrackGolemBehaviour extends SimpleBehaviour {
 //							}						
 //						}
 //					}
-					
-					// If a stench is detected, moving to one of the nodes with a stench (randomly)
-					// Else moving randomly
-					if (potentialNodes.isEmpty() == false) {
-				        nextNode = potentialNodes.get(this.r.nextInt(potentialNodes.size()));
-					} else {
-						nextNode = lobs.get(this.r.nextInt(lobs.size()-1)+1).getLeft();
-						System.out.println("RANDOM MOVE " + nextNode);
-					}
-				} else {
-					nextNode = nextNode2;
-					this.golemFound = false;
-				}
-
 				
-				oldPos = ((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
-				((AbstractDedaleAgent)this.myAgent).moveTo(nextNode);
-				System.out.println("OldPos : " + oldPos + " nextNode : " + nextNode);
-				newPos = ((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
+				// If a stench is detected, moving to one of the nodes with a stench (randomly)
+				// Else moving randomly
+				if (stenchedNodes.isEmpty() == false) {
+			        nextNode = stenchedNodes.get(this.r.nextInt(stenchedNodes.size()));
+				} else {
+					nextNode = lobs.get(this.r.nextInt(lobs.size()-1)+1).getLeft();
+					System.out.println("RANDOM MOVE " + nextNode);
+				}
+			} else {
+				nextNode = nextNode2;
+				this.golemFound = false;
+			}
+
+			
+			oldPos = ((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
+			((AbstractDedaleAgent)this.myAgent).moveTo(nextNode);
+			System.out.println("OldPos : " + oldPos + " nextNode : " + nextNode);
+			newPos = ((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
 //				System.out.println("old Pos :" + oldPos);
 //				System.out.println("new Pos :" + newPos);
-				
-				// If the agent was not able to move
-				if (oldPos.equals(newPos)) {
+			
+			// If the agent was not able to move
+			if (oldPos.equals(newPos)) {
 //					System.out.println("PERHAPS GOLEM FOUND");
-					this.myAgent.addBehaviour(new checkGolemIsNearbyBehaviour(this.myAgent));
-					try {
-						this.myAgent.doWait(300);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					// Check if there is an agent in the next node
+				this.myAgent.addBehaviour(new CheckGolemIsNearbyBehaviour(this.myAgent));
+				try {
+					this.myAgent.doWait(300);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				// Check if there is an agent in the next node
 //					System.out.println("nextNode : " + nextNode + " " + this.myAgent.getAgentsPos().contains(nextNode));
-					if (this.myAgent.getAgentsPos().contains(nextNode) == false) {
-						System.out.println(this.myAgent.getLocalName() + " : nextNode" + nextNode + " listPos : " + this.myAgent.getAgentsPos());
-						nextNode2 = nextNode;
-						this.golemFound = true;
-						System.out.println(this.myAgent.getLocalName() + " : GOLEM FOUND at " + nextNode + " Current pos : " + newPos);
-					}
+				if (this.myAgent.getAgentsPos().contains(nextNode) == false) {
+					System.out.println(this.myAgent.getLocalName() + " : nextNode" + nextNode + " listPos : " + this.myAgent.getAgentsPos());
+					nextNode2 = nextNode;
+					this.golemFound = true;
+					System.out.println(this.myAgent.getLocalName() + " : GOLEM FOUND at " + nextNode + " Current pos : " + newPos);
 				}
 			}
 		}
+		
 	}
 
 	@Override

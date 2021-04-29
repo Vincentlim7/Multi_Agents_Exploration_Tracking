@@ -59,27 +59,25 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 //			System.out.println("-------------------------Message recu");
 			try {
 				if (pingMsg != null) {
-					String idSender = pingMsg.getContent();
-					this.myAgent.addDetectedAgent(idSender);
 					ACLMessage msg=new ACLMessage(ACLMessage.INFORM);
 					msg.setSender(this.myAgent.getAID());
 					msg.setProtocol("ConfirmProtocol");
-					msg.setContent("Ping recu");
+					msg.setContentObject(this.myAgent.getInfosAgent()); 
 					msg.addReceiver(new AID(pingMsg.getSender().getLocalName(),AID.ISLOCALNAME));
 					this.myAgent.sendMessage(msg);
-//					System.out.println("Ping recu");
+					System.out.println(this.myAgent.getLocalName() + " --> Ping message received from " + pingMsg.getSender().getLocalName());
 					
 				}
 				if (mapMsg != null) {
-					System.out.println("MAP MESSAGE RECEIVED");
 					SerializableSimpleGraph o = (SerializableSimpleGraph) mapMsg.getContentObject();
 					this.myAgent.getMap().mergeMap(o);
-//					System.out.println(this.myAgent.getLocalName()+"<----Result received from "+msg.getSender().getLocalName()+" ,content= "+msg.getContentObject());
-//					System.out.println("Carte recu");
+					System.out.println(this.myAgent.getLocalName() + " --> Map message received from " + mapMsg.getSender().getLocalName());
 				}
 				if(confirmMsg != null) {
-//					System.out.println("YESYESYESYESYES");
-					this.myAgent.addBehaviour(new SendMessagerBehaviour(this.myAgent));
+					ArrayList<String> infosAgent = (ArrayList<String>) confirmMsg.getContentObject();
+					this.myAgent.addDetectedAgent(infosAgent);
+					System.out.println(this.myAgent.getLocalName() + " --> Confirm message received from " + confirmMsg.getSender().getLocalName());
+					this.myAgent.addBehaviour(new ShareMapBehaviour(this.myAgent));
 				}
 				
 				// If ping received, send current position to the ping sender
@@ -102,7 +100,7 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 					
 				}
 				
-			} catch (UnreadableException e1) {
+			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}

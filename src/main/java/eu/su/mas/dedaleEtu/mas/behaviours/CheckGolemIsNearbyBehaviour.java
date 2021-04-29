@@ -19,13 +19,13 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
 
-public class checkGolemIsNearbyBehaviour extends OneShotBehaviour{
+public class CheckGolemIsNearbyBehaviour extends OneShotBehaviour{
 
 	private static final long serialVersionUID = -2058134622078521998L;
 	private ExploreCoopAgent myAgent;
 	private DFAgentDescription dfd;
 
-	public checkGolemIsNearbyBehaviour (final ExploreCoopAgent myAgent) {
+	public CheckGolemIsNearbyBehaviour (final ExploreCoopAgent myAgent) {
 		super(myAgent);
 		this.myAgent = myAgent;
 		this.dfd = myAgent.getAgentDescription();
