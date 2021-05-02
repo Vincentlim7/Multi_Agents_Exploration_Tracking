@@ -100,13 +100,29 @@ public class MapRepresentation implements Serializable {
 	 * @param id id of the node
 	 * @return true if added
 	 */
-	public synchronized boolean addNewNode(String id) {
-		if (this.g.getNode(id)==null){
-			addNode(id,MapAttribute.open);
-			return true;
-		}
-		return false;
-	}
+//	public synchronized boolean addNewNode(String id) {
+//		if (this.g.getNode(id)==null){
+//			addNode(id,MapAttribute.open);
+//			return true;
+//		}
+//		return false;
+//	}
+	
+	// ---------- Our version of addNewNode ----------
+	// Return true if the agent can go to the open node
+    public synchronized boolean addNewNode(String id) {
+        Node n;
+        
+        if (this.g.getNode(id)==null ){
+            addNode(id,MapAttribute.open);
+            return true;
+        }
+        n=this.g.getNode(id);
+        if(n.getAttribute("ui.class").equals("open") ){
+            return true;
+        }
+        return false;
+    }
 
 	/**
 	 * Add an undirect edge if not already existing.
@@ -123,7 +139,6 @@ public class MapRepresentation implements Serializable {
 		}catch (EdgeRejectedException e2) {
 			this.nbEdges--;
 		} catch(ElementNotFoundException e3){
-
 		}
 	}
 
@@ -135,8 +150,8 @@ public class MapRepresentation implements Serializable {
 	 * @param idTo id of the destination node
 	 * @return the list of nodes to follow, null if the targeted node is not currently reachable
 	 */
-	public synchronized List<String> getShortestPath(String idFrom,String idTo){
-		List<String> shortestPath=new ArrayList<String>();
+	public synchronized ArrayList<String> getShortestPath(String idFrom,String idTo){
+		ArrayList<String> shortestPath=new ArrayList<String>();
 
 		Dijkstra dijkstra = new Dijkstra();//number of edge
 		dijkstra.init(g);
@@ -156,21 +171,46 @@ public class MapRepresentation implements Serializable {
 		return shortestPath;
 	}
 
-	public List<String> getShortestPathToClosestOpenNode(String myPosition) {
-		//1) Get all openNodes
-		List<String> opennodes=getOpenNodes();
-
-		//2) select the closest one
-		List<Couple<String,Integer>> lc=
-				opennodes.stream()
-				.map(on -> (getShortestPath(myPosition,on)!=null)? new Couple<String, Integer>(on,getShortestPath(myPosition,on).size()): new Couple<String, Integer>(on,Integer.MAX_VALUE))//some nodes my be unreachable if the agents do not share at least one common node.
-				.collect(Collectors.toList());
-
-		Optional<Couple<String,Integer>> closest=lc.stream().min(Comparator.comparing(Couple::getRight));
-		//3) Compute shorterPath
-
-		return getShortestPath(myPosition,closest.get().getLeft());
-	}
+//	public List<String> getShortestPathToClosestOpenNode(String myPosition, int x) {
+//		//1) Get all openNodes
+//		List<String> opennodes=getOpenNodes();
+//
+//		//2) select the closest one
+//		List<Couple<String,Integer>> lc=
+//				opennodes.stream()
+//				.map(on -> (getShortestPath(myPosition,on)!=null)? new Couple<String, Integer>(on,getShortestPath(myPosition,on).size()): new Couple<String, Integer>(on,Integer.MAX_VALUE))//some nodes my be unreachable if the agents do not share at least one common node.
+//				.collect(Collectors.toList());
+//		
+//		//3) Compute shorterPath
+//		Optional<Couple<String,Integer>> closest=lc.stream().min(Comparator.comparing(Couple::getRight));
+//		
+//		return getShortestPath(myPosition,closest.get().getLeft());
+//	}
+	
+	// ---------- Our version of getShortestPathToClosestOpenNode ----------
+	// Return path to the i_agent-th closest Open Node
+    public ArrayList<String> getShortestPathToClosestOpenNode(String id, int i_agent) {
+        Node n = this.g.getNode(id);
+        Iterator<? extends Node> k  = n.getBreadthFirstIterator();
+        List<String> opennodes=getOpenNodes();
+        Node next=null;
+        int cpt=0;
+        
+        while (k.hasNext() && cpt<=i_agent) {
+            next = k.next();
+//            System.out.println("BFS exploration "+next);
+            if (opennodes.contains(next.toString())){
+                cpt++;
+//                System.out.println("found "+cpt+" opened node "+next);
+                // If there is less open Nodes then i_agent, return the closest Open Nodes
+                if(i_agent >= opennodes.size()) {
+                	break;
+                }
+            }
+        }
+        return getShortestPath(n.toString(),next.toString());
+        
+    }
 
 
 
@@ -301,7 +341,7 @@ public class MapRepresentation implements Serializable {
 				addEdge(n.getNodeId(),s);
 			}
 		}
-		System.out.println("Merge done");
+//		System.out.println("Merge done");
 	}
 
 	/**
