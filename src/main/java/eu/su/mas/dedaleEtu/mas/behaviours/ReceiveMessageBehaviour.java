@@ -46,7 +46,7 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 					msg.setContentObject(this.myAgent.getInfosAgent()); 
 					msg.addReceiver(new AID(pingMsg.getSender().getLocalName(),AID.ISLOCALNAME));
 					this.myAgent.sendMessage(msg);
-					System.out.println(this.myAgent.getLocalName() + " --> Ping message received from " + pingMsg.getSender().getLocalName());
+//					System.out.println(this.myAgent.getLocalName() + " --> Ping message received from " + pingMsg.getSender().getLocalName());
 					
 				}
 				// Merge the received map
@@ -54,13 +54,13 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 					SerializableSimpleGraph o = (SerializableSimpleGraph) mapMsg.getContentObject();
 					this.myAgent.getMap().mergeMap(o);
 					this.myAgent.setShortestPath(new ArrayList<String>());
-					System.out.println(this.myAgent.getLocalName() + " --> Map message received from " + mapMsg.getSender().getLocalName());
+//					System.out.println(this.myAgent.getLocalName() + " --> Map message received from " + mapMsg.getSender().getLocalName());
 				}
 				// Add the agent who identified himself to the detected agent list
 				if(confirmMsg != null) {
 					ArrayList<String> infosAgent = (ArrayList<String>) confirmMsg.getContentObject();
 					this.myAgent.addDetectedAgent(infosAgent);
-					System.out.println(this.myAgent.getLocalName() + " --> Confirm message received from " + confirmMsg.getSender().getLocalName());
+//					System.out.println(this.myAgent.getLocalName() + " --> Confirm message received from " + confirmMsg.getSender().getLocalName());
 					this.myAgent.addBehaviour(new ShareMapBehaviour(this.myAgent));
 				}
 				// If the agent currently isn't detecting a stench or a wumpus, or doesn't already have a destination, accept the destination sent
@@ -68,7 +68,7 @@ public class ReceiveMessageBehaviour extends SimpleBehaviour{
 					if(this.myAgent.getDestination() == null && this.myAgent.getWumpusFound() == false && this.myAgent.getStenchedNodes() == null) {
 						String destination = destinationMsg.getContent();
 						this.myAgent.setDestination(destination);
-						System.out.println(this.myAgent.getLocalName() + " --> Destination message received from " + destinationMsg.getSender().getLocalName());
+//						System.out.println(this.myAgent.getLocalName() + " --> Destination message received from " + destinationMsg.getSender().getLocalName());
 					}
 				}
 			} catch (Exception e1) {
