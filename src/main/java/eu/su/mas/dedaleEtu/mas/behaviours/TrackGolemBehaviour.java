@@ -108,6 +108,11 @@ public class TrackGolemBehaviour extends OneShotBehaviour {
 				}
 			}else { // I received a location containing either a stench or a wumpus, heading there
 				System.out.println(this.myAgent.getLocalName() + " --> I have a destination : " + this.myAgent.getDestination());
+				try {
+					this.myAgent.doWait(1000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				this.myAgent.setNextNode(this.myAgent.getMap().getShortestPath(myPosition, this.myAgent.getDestination()).get(0));
 			}
 			System.out.println(this.myAgent.getLocalName() + " --> next Node : " + this.myAgent.getNextNode());
