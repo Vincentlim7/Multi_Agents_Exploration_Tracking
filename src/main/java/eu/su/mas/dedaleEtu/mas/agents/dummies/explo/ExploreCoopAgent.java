@@ -48,7 +48,7 @@ public class ExploreCoopAgent extends AbstractDedaleAgent {
 	private static final long serialVersionUID = -7969469610241668140L;
 	private MapRepresentation myMap;
 	
-	private static final int NB_MAX_TRY = 50; 	// Number of time the agent try to move toward the wumpus node unsucessfully consecutively before considering he is blocking a wumpus
+	private static final int NB_MAX_TRY = 500; 	// Number of time the agent try to move toward the wumpus node unsucessfully consecutively before considering he is blocking a wumpus
 	private int nbTry;							// Number of time the agent tried to move toward the wumpus node unsucessfully consecutively
 	private static int cpt = 1;		// cpt used to affect idAgent
 	private String idAgent;			// id of agent

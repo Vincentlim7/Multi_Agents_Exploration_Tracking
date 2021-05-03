@@ -68,7 +68,7 @@ public class ExploCoopBehaviour extends OneShotBehaviour {
 			}
 			
 			// Check if there is an adjacent stenched nodes, if so, switch to tracking mod
-			for (int i = 0; i<lobs.size(); i++) {
+			for (int i = 1; i<lobs.size(); i++) {
 				ArrayList<Couple> content = (ArrayList) lobs.get(i).getRight();
 				if (content.isEmpty() == false) {	// Add stenched nodes to a list
 					if (content.get(content.size() - 1).getLeft().toString().equals("Stench")) {
@@ -76,6 +76,7 @@ public class ExploCoopBehaviour extends OneShotBehaviour {
 							this.myAgent.resetShortestPath();
 							this.myAgent.switchState();
 							this.exitValue = 2;
+							System.out.println(this.myAgent.getLocalName() + " ----> My nodes to avoid : "+ this.myAgent.getNodesToAvoid());
 							System.out.println(this.myAgent.getLocalName() + " --> Switch to tracking mode without finishing exploration");
 							return;
 						}
