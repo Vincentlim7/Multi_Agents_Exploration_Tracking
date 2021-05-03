@@ -52,7 +52,7 @@ public class TrackGolemBehaviour extends OneShotBehaviour {
 				System.out.println(this.myAgent.getLocalName() + " --> nb try :" + this.myAgent.getNbTry());
 				
 				try {
-					this.myAgent.doWait(500);
+					this.myAgent.doWait(1000);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

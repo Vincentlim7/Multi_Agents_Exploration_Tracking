@@ -67,6 +67,17 @@ public final class ConfigurationFile {
 	 *  These parameters must be empty if the environment is generated or already online 
 	 *****************************/
 	
+	// Configurations for the exam
+	
+	public static String INSTANCE_TOPOLOGY="resources/map2021-topologyExam1-tree.dgs";//pour l'arbre
+//	public static String INSTANCE_TOPOLOGY="resources/map2021-topologyExam1-graph.dgs";//pour le graphe
+	
+	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/map2021-entitiesTree";//pour l'arbre
+//	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/map2021-entitiesGraph";//pour le graphe
+
+	
+	
+	
 	/**
 	 * Give the topology 
 	 */
@@ -75,7 +86,7 @@ public final class ConfigurationFile {
 	//public static String INSTANCE_TOPOLOGY="resources/topology/map2020-topologyExam1-graph.dgs";
 	//public static String INSTANCE_TOPOLOGY="resources/topology/HouatTopology";
 //	public static String INSTANCE_TOPOLOGY="resources/topology/map2018-topology-ica";
-	public static String INSTANCE_TOPOLOGY="resources/topology/map2020-topologyExam1-tree.dgs";
+//	public static String INSTANCE_TOPOLOGY="resources/topology/map2020-topologyExam1-tree.dgs";
 	//public static String INSTANCE_TOPOLOGY="resources/interlocking/mapInterlocking2-topology";
 	//public static String INSTANCE_TOPOLOGY="resources/map2018-topology";
 	//public static String INSTANCE_TOPOLOGY="resources/map2019-topologyExam1";
@@ -147,7 +158,7 @@ public final class ConfigurationFile {
 	//public static String INSTANCE_CONFIGURATION_ENTITIES=null;
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="resources/agentExplo";
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="resources/agentExplo-2";
-	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/agentExploCoop-2";
+//	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/agentExploCoop-2";
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="resources/agentKeyboardControlled";
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="resources/hunt/map2020-entitiesTree";
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="resources/hunt/map2020-entitiesGraph";
@@ -168,5 +179,5 @@ public final class ConfigurationFile {
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="src/test/java/resources/map2018-agentGolem";
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="src/test/java/resources/map2018-agentTankerCollect";
 	//public static String INSTANCE_CONFIGURATION_ENTITIES="src/test/java/resources/map2019-entitiesExam1";
-
+	
 }

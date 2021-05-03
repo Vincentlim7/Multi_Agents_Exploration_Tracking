@@ -44,7 +44,7 @@ public class ExploCoopBehaviour extends OneShotBehaviour {
 			List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe(); // List of observable from the agent's current position
 			System.out.println(this.myAgent.getLocalName() + " --> Explo observations : " + lobs.toString());
 			try {
-				this.myAgent.doWait(500);
+				this.myAgent.doWait(1000);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
