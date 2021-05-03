@@ -31,6 +31,11 @@ public class TrackGolemBehaviour extends OneShotBehaviour {
 
 	@Override
 	public void action() {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		// Wumpus blocked
 		if(this.myAgent.getFinished()) {
 			this.exitValue = 3;
@@ -45,35 +50,28 @@ public class TrackGolemBehaviour extends OneShotBehaviour {
 		String myPosition=((AbstractDedaleAgent)this.myAgent).getCurrentPosition();
 
 		if (myPosition!=null){
-			if(this.myAgent.getDestination() == null) {
-				//List of observable from the agent's current position
-				List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe();//myPosition
-				System.out.println(this.myAgent.getLocalName() + " --> Track observations : " + lobs.toString());
-				System.out.println(this.myAgent.getLocalName() + " --> nb try :" + this.myAgent.getNbTry());
-				
-				try {
-					this.myAgent.doWait(1000);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-				// If the agent hasn't explored 100% of the map, update open/closed nodes while tracking
-				if(!this.myAgent.isExploFinished()) {
-					// 1) remove the current node from openlist and add it to closedNodes.
-					this.myAgent.getMap().addNode(myPosition, MapAttribute.closed);
+			//List of observable from the agent's current position
+			List<Couple<String,List<Couple<Observation,Integer>>>> lobs=((AbstractDedaleAgent)this.myAgent).observe();//myPosition
+			System.out.println(this.myAgent.getLocalName() + " --> Track observations : " + lobs.toString());
+			System.out.println(this.myAgent.getLocalName() + " --> nb try :" + this.myAgent.getNbTry());
+							
+			// If the agent hasn't explored 100% of the map, update open/closed nodes while tracking
+			if(!this.myAgent.isExploFinished()) {
+				// 1) remove the current node from openlist and add it to closedNodes.
+				this.myAgent.getMap().addNode(myPosition, MapAttribute.closed);
 
-					// 2) get the surrounding nodes and, if not in closedNodes, add them to open nodes.
-					Iterator<Couple<String, List<Couple<Observation, Integer>>>> iter=lobs.iterator();
-					while(iter.hasNext()){
-						String nodeId=iter.next().getLeft();
-						boolean isNewNode=this.myAgent.getMap().addNewNode(nodeId);
-						//the node may exist, but not necessarily the edge
-						if (myPosition!=nodeId) {
-							this.myAgent.getMap().addEdge(myPosition, nodeId);
-						}
+				// 2) get the surrounding nodes and, if not in closedNodes, add them to open nodes.
+				Iterator<Couple<String, List<Couple<Observation, Integer>>>> iter=lobs.iterator();
+				while(iter.hasNext()){
+					String nodeId=iter.next().getLeft();
+					boolean isNewNode=this.myAgent.getMap().addNewNode(nodeId);
+					//the node may exist, but not necessarily the edge
+					if (myPosition!=nodeId) {
+						this.myAgent.getMap().addEdge(myPosition, nodeId);
 					}
 				}
-				
+			}
+			if(this.myAgent.getDestination() == null) {
 				// If golem not found, compute a nextNode
 				// Else, golem was found because the agent was not able to move at the previous iteration, Try moving to the same node
 				if(this.myAgent.getWumpusFound() == false) {
@@ -108,11 +106,6 @@ public class TrackGolemBehaviour extends OneShotBehaviour {
 				}
 			}else { // I received a location containing either a stench or a wumpus, heading there
 				System.out.println(this.myAgent.getLocalName() + " --> I have a destination : " + this.myAgent.getDestination());
-				try {
-					this.myAgent.doWait(1000);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 				this.myAgent.setNextNode(this.myAgent.getMap().getShortestPath(myPosition, this.myAgent.getDestination()).get(0));
 			}
 			System.out.println(this.myAgent.getLocalName() + " --> next Node : " + this.myAgent.getNextNode());

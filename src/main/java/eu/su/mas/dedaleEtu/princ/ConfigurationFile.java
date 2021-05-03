@@ -69,11 +69,11 @@ public final class ConfigurationFile {
 	
 	// Configurations for the exam
 	
-	public static String INSTANCE_TOPOLOGY="resources/map2021-topologyExam1-tree.dgs";//pour l'arbre
-//	public static String INSTANCE_TOPOLOGY="resources/map2021-topologyExam1-graph.dgs";//pour le graphe
+//	public static String INSTANCE_TOPOLOGY="resources/map2021-topologyExam1-tree.dgs";//pour l'arbre
+//	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/map2021-entitiesTree";//pour l'arbre
 	
-	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/map2021-entitiesTree";//pour l'arbre
-//	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/map2021-entitiesGraph";//pour le graphe
+	public static String INSTANCE_TOPOLOGY="resources/map2021-topologyExam1-graph.dgs";//pour le graphe
+	public static String INSTANCE_CONFIGURATION_ENTITIES="resources/map2021-entitiesGraph";//pour le graphe
 
 	
 	
@@ -119,7 +119,7 @@ public final class ConfigurationFile {
 	/**
 	 * Size of the generated environment, mandatory
 	 */
-	public static Integer ENVIRONMENT_SIZE=5;
+	public static Integer ENVIRONMENT_SIZE=10;
 	// Parameters required for some generators (see dedale.gitlab.io)
 	public static Integer OPTIONAL_ADDITIONAL_ENVGENERATOR_PARAM1=1;//used by the BARABASI_ALBERT generator to know the number of childs
 	public static Integer[] GENERATOR_PARAMETERS= {ENVIRONMENT_SIZE,OPTIONAL_ADDITIONAL_ENVGENERATOR_PARAM1};
